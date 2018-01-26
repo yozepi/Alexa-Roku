@@ -1,0 +1,16 @@
+home
+left
+right
+down
+up
+back
+select
+reverse
+forward
+play
+instant replay
+info
+information
+backspace
+enter
+search

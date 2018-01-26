@@ -1,0 +1,103 @@
+{
+  "intents": [
+    {
+      "intent": "SelectRokuIntent"
+    },
+    {
+      "intent": "SelectedRokuIntent",
+      "slots": [
+        {
+          "name": "choice",
+          "type": "ANY_CONTENT"
+        }
+      ]
+    },
+    {
+      "intent": "SendCommandIntent",
+      "slots": [
+        {
+          "name": "rokucommand",
+          "type": "ROKU_COMMANDS"
+        },
+        {
+          "name": "count",
+          "type": "ANY_CONTENT"
+        }
+      ]
+    },
+    {
+      "intent": "TypeTextIntent",
+      "slots": [
+        {
+          "name": "text_a",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_b",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_c",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_d",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_e",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_f",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_g",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_h",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_i",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_j",
+          "type": "ANY_CONTENT"
+        }
+      ]
+    },
+    {
+      "intent": "LaunchAppIntent",
+      "slots": [
+        {
+          "name": "filter_a",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "filter_b",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "filter_c",
+          "type": "ANY_CONTENT"
+        }
+      ]
+    },
+    {
+      "intent": "ListRokusIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    }
+  ]
+}

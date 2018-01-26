@@ -1,0 +1,69 @@
+
+SelectedRokuIntent select roku number {choice}
+SelectedRokuIntent choose roku number {choice}
+SelectedRokuIntent change to roku number {choice}
+SelectedRokuIntent switch to roku number {choice}
+SelectedRokuIntent choose roku {choice}
+SelectedRokuIntent change to roku {choice}
+SelectedRokuIntent switch to roku {choice}
+SelectedRokuIntent use roku {choice}
+SelectedRokuIntent use {choice} roku
+SelectedRokuIntent use my {choice} roku
+
+SelectRokuIntent select roku
+SelectRokuIntent select a roku
+
+ListRokusIntent list my rokus
+ListRokusIntent list all my rokus
+ListRokusIntent tell me my rokus
+ListRokusIntent what are my rokus
+ListRokusIntent list rokus
+
+SendCommandIntent {rokucommand}
+SendCommandIntent {rokucommand} {count}
+SendCommandIntent {rokucommand} {count} times
+
+SendCommandIntent go {rokucommand}
+SendCommandIntent go {rokucommand} {count}
+SendCommandIntent go {rokucommand} {count} times
+
+SendCommandIntent move {rokucommand}
+SendCommandIntent move {rokucommand} {count}
+SendCommandIntent move {rokucommand} {count} times
+
+SendCommandIntent navigate {rokucommand}
+SendCommandIntent navigate {rokucommand} {count}
+SendCommandIntent navigate {rokucommand} {count} times
+
+
+TypeTextIntent type {text_a}
+TypeTextIntent type {text_a} {text_b}
+TypeTextIntent type {text_a} {text_b} {text_c}
+TypeTextIntent type {text_a} {text_b} {text_c} {text_d}
+TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e}
+TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f}
+TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g}
+TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h}
+TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i}
+TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i} {text_j}
+
+
+LaunchAppIntent launch {filter_a}
+LaunchAppIntent launch {filter_a} {filter_b}
+LaunchAppIntent launch {filter_a} {filter_b} {filter_c}
+
+LaunchAppIntent open {filter_a}
+LaunchAppIntent open {filter_a} {filter_b}
+LaunchAppIntent open {filter_a} {filter_b} {filter_c}
+
+LaunchAppIntent start {filter_a}
+LaunchAppIntent start {filter_a} {filter_b}
+LaunchAppIntent start {filter_a} {filter_b} {filter_c}
+
+LaunchAppIntent run {filter_a}
+LaunchAppIntent run {filter_a} {filter_b}
+LaunchAppIntent run {filter_a} {filter_b} {filter_c}
+
+LaunchAppIntent start viewing {filter_a}
+LaunchAppIntent start viewing {filter_a} {filter_b}
+LaunchAppIntent start viewing {filter_a} {filter_b} {filter_c}
