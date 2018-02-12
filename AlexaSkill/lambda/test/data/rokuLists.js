@@ -14,7 +14,7 @@ module.exports = {
         },
         {
             "id": "ABC1234",
-            "name": "Bedroom"
+            "name": "Family Room"
         }
     ]
 }

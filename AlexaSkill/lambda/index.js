@@ -2,8 +2,8 @@
 
 var constants = require('./helpers').constants;
 var rokuService = require('./services/rokuHttpService');
-
 var rokuIntents = require('./Roku/rokuIntents');
+var directiveServiceFactory = require('./Roku/DirectiveServiceFactory');
 var Alexa = require('alexa-sdk');
 
 
@@ -12,8 +12,8 @@ exports.handler = function (event, context, callback) {
   var alexa = Alexa.handler(event, context);
   alexa.appId = constants.appId;
   alexa.dynamoDBTableName = 'MyRokuRemoteSession';
-  
-  var intents = new rokuIntents({rokuService: rokuService, logger: console});
+
+  var intents = new rokuIntents({ rokuService: rokuService, logger: console, directiveServiceFactory: directiveServiceFactory });
 
   var intentHandlers = {
     // "this" is going to be an instance of  alexa-sdk's alexaRequestHandler.
@@ -21,8 +21,8 @@ exports.handler = function (event, context, callback) {
     // This enables me to unit test the handlers without mocking a ton
     // of the alexa-sdk infrastructure.
     'NewSession': function () { intents.newSessionIntent(this); },
+
     'SelectRokuIntent': function () { intents.selectRokuIntent(this); },
-    'SelectedRokuIntent': function () { intents.selectedRokuIntent(this); },
     'SendCommandIntent': function () { intents.sendCommandIntent(this); },
     'TypeTextIntent': function () { intents.typeTextIntent(this); },
     'LaunchAppIntent': function () { intents.launchAppIntent(this); },

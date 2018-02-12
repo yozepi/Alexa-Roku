@@ -4,6 +4,10 @@ var constants = require('../../helpers').constants;
 
 var fillSlots = function (slots, text, slotPrefix, maxLength) {
 
+    if(!text) {
+        return;
+    }
+    
     var startCode = 'a'.charCodeAt(0);
     var textArr = text.split(' ');
     for (var i = 0; i < (textArr.length > maxLength ? maxLength : textArr.length); i++) {
@@ -15,7 +19,7 @@ var fillSlots = function (slots, text, slotPrefix, maxLength) {
 module.exports = {
 
     launch: function () {
-        
+
         var response = {
             "session": {
                 "new": false,
@@ -29,11 +33,8 @@ module.exports = {
                 }
             },
             "request": {
-                "type": "IntentRequest",
+                "type": "LaunchRequest",
                 "requestId": "EdwRequestId.09e99249-761a-44b9-8770-02c91d2c0244",
-                "intent": {
-                    "name": "Launch"
-                },
                 "locale": "en-US",
                 "timestamp": "2018-01-13T08:25:34Z"
             },
@@ -192,9 +193,15 @@ module.exports = {
                 "intent": {
                     "name": "SelectedRokuIntent",
                     "slots": {
-                        "choice": {
-                            "name": "choice"
-                        }
+                        "choice_a": {
+                            "name": "choice_a"
+                        },
+                        "choice_b": {
+                            "name": "choice_b"
+                        },
+                        "choice_c": {
+                            "name": "choice_c"
+                        },
                     }
                 },
                 "locale": "en-US",
@@ -218,8 +225,7 @@ module.exports = {
             },
             "version": "1.0"
         };
-
-        response.request.intent.slots.choice.value = choice;
+        fillSlots(response.request.intent.slots, choice, 'choice_', 3)
         return response;
     },
 

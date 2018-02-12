@@ -11,6 +11,7 @@ var intents = function (options) {
     var speachQueue = [];
     var rokuService = options.rokuService;
     var logger = options.logger;
+    var directiveServiceFactory = options.directiveServiceFactory;
 
     // A helper command to get and cache a list of roku remotes.
     // There are a few cases where an intent will pass control to another intent.
@@ -33,95 +34,60 @@ var intents = function (options) {
     };
 
 
-    //This intent is called every time a session begins with
-    //Alexa.
+    //This intent is called every time an Alexa session begins.
     this.newSessionIntent = function (alexa) {
-
-        //"welcome..."
-        speachQueue.push(constants.newSessionIntent.startupSpeech);
 
         if (!alexa.attributes[constants.attributes.selectedRoku]) {
             //No roku currently selected. Let's go select a Roku.
-            getRokus()
-                .then(function (rokus) {
-                    //"here's what I can do..."
-                    speachQueue.push(constants.newSessionIntent.introductorySpeech)
-                    if (rokus.length > 1) {
-                        //"lets pick a Roku..."
-                        speachQueue.push(constants.newSessionIntent.selectRokuSpeech)
-                    }
-                    //Let the selectRokuIntent take over to continue selecting a Roku.
-                    alexa.emitWithState(constants.intents.SelectRokuIntent)
-                })
-                .catch(function (err) {
-                    logger.error(err);
-                    //"something's broken..."
-                    speachQueue.push(constants.selectRokuIntent.unableToListRokus);
-                    alexa.emit(':tell', speachQueue.join(' '));
-                });
+
+            //"welcome..."
+            speachQueue.push(constants.newSessionIntent.startupSpeech);
+            //"here's what I can do..."
+            speachQueue.push(constants.newSessionIntent.introductorySpeech)
+            //"lets pick a Roku..."
+            speachQueue.push(constants.newSessionIntent.selectRokuSpeech)
+            //Let the selectRokuIntent take over to continue selecting a Roku.
+
+            alexa.emitWithState(constants.intents.SelectRokuIntent)
         }
         else {
             //Check if the intent is one of the action intents.
-            if (constants.intents[alexa.event.request.intent.name]) {
+            if (alexa.event.request.type === 'IntentRequest') {
                 //Let the intent take over.
                 alexa.emitWithState(alexa.event.request.intent.name)
             }
             else {
                 //Otherwise we're ready to begin!
+                speachQueue.push(constants.newSessionIntent.launchSpeech);
                 alexa.emit(':ask', speachQueue.join(' '), constants.newSessionIntent.repromptSpeech);
             }
         }
     };
 
 
-    //This intent prompts the user to select a roku remote.
-    this.selectRokuIntent = function (alexa) {
-
-        getRokus()
-            .then(function (rokus) {
-
-                if (rokus.length === 0) {
-                    //No rokus found on the network. Tell the caller to turn one on.
-                    speachQueue.push(constants.selectRokuIntent.noRokusFoundSpeach);
-                    alexa.emit(':tell', speachQueue.join(' '));
-                }
-                else {
-                    var reprompt;
-
-                    if (rokus.length === 1) {
-                        //Only one roku in the list. We'll use it by default.
-                        alexa.attributes[constants.attributes.selectedRoku] = rokus[0];
-                        speachQueue.push(constants.selectRokuIntent.singleRokuFoundSpeach(rokus[0]));
-                        speachQueue.push(constants.defaultRepromptSpeech);
-                        reprompt = constants.defaultRepromptSpeech;
-                    }
-                    else {
-                        //"choose one of the following Rokus..."
-                        speachQueue.push(constants.selectRokuIntent.selectARokuSpeach);
-                        speachQueue.push(helpers.listRokusToSpeach(rokus));
-
-                        //instructions on how to choose a Roku.
-                        reprompt = constants.selectRokuIntent.instructionSpeech(rokus);
-                    }
-                    alexa.emit(':ask', speachQueue.join(' '), reprompt);
-                }
-            })
-            .catch(function (err) {
-                logger.error(err);
-                speachQueue.push(constants.selectRokuIntent.unableToListRokus);
-                alexa.emit(':tell', speachQueue.join(' '));
-            });
-
-    };
-
     //This intent selects the roku the user has selected.
     //Examples:
-    //  "select Roku # 2"
+    //  "change to Roku # 2"
     //  "use my bedroom roku"
-    this.selectedRokuIntent = function (alexa) {
+    this.selectRokuIntent = function (alexa) {
 
-        getRokus()
-            .then(function (rokus) {
+        //"I'm looking for Roku called..."
+        var choice = helpers.concatSlots(alexa.event.request.intent.slots, 'choice');
+        if (choice) {
+            speachQueue.push(constants.selectRokuIntent.lookingForRokuSpeach);
+            speachQueue.push(choice);
+        }
+        else {
+            //No choice sent. Use the general looup text.
+            speachQueue.push(constants.selectRokuIntent.lookingForRokusSpeach);
+        }
+        var dsPromise = directiveServiceFactory.enqueue(alexa.event, speachQueue.join(' '));
+        speachQueue = [];
+
+        var rokuPromise = getRokus().then(function (r) { rokus = r; });
+
+        Promise.all([dsPromise, rokuPromise])
+            .then(function () {
 
                 if (rokus.length === 0) {
                     //No rokus found on the network. Tell the caller to turn one on.
@@ -130,28 +96,52 @@ var intents = function (options) {
                 }
                 else {
                     var reprompt;
-                    var choice = alexa.event.request.intent.slots.choice.value
-                    if (choice && isNaN(choice)) {
-                        //Try to find a roku with the same name.
-                        choice = choice.toLowerCase();
-                        for (var i = 0; i < rokus.length; i++) {
-                            if (rokus[i].name && rokus[i].name.toLowerCase() == choice) {
-                                choice = i + 1; //Change to the index in the array.
-                                break;
-                            }
+
+                    //No Roku sent in request.
+                    if (!choice) {
+
+                        if (rokus.length === 1) {
+                            //Only one roku in the list. We'll use it by default.
+                            alexa.attributes[constants.attributes.selectedRoku] = rokus[0];
+                            speachQueue.push(constants.selectRokuIntent.singleRokuFoundSpeach(rokus[0]));
+                            speachQueue.push(constants.defaultRepromptSpeech);
+                            reprompt = constants.defaultRepromptSpeech;
+                        }
+                        else {
+                            //"choose one of the following Rokus..."
+                            speachQueue.push(constants.selectRokuIntent.selectARokuSpeach);
+                            speachQueue.push(helpers.listRokusToSpeach(rokus));
+
+                            //instructions on how to choose a Roku.
+                            reprompt = constants.selectRokuIntent.instructionSpeech(rokus);
                         }
                     }
-                    if (!choice || isNaN(choice) || choice < 1 || choice > rokus.length) {
-                        //index is out of bounds
-                        speachQueue.push(constants.selectedRokuIntent.badSelectionSpeach);
-                        alexa.emitWithState(constants.intents.SelectRokuIntent);
-                    }
+
+                    //There was a Roku Requested.
                     else {
-                        //Select the Roku
-                        var roku = rokus[choice - 1];
-                        alexa.attributes[constants.attributes.selectedRoku] = roku;
-                        speachQueue.push(constants.selectedRokuIntent.rokuSelectedSpeach(roku));
-                        reprompt = constants.defaultRepromptSpeech;
+                        if (isNaN(choice)) {
+                            //Try to find a roku with the same name.
+                            choice = choice.toLowerCase();
+                            for (var i = 0; i < rokus.length; i++) {
+                                if (rokus[i].name && rokus[i].name.toLowerCase() == choice) {
+                                    choice = i + 1; //Change to the index in the array.
+                                    break;
+                                }
+                            }
+                        }
+                        if (isNaN(choice) || choice < 1 || choice > rokus.length) {
+                            //index is out of bounds
+                            speachQueue.push(constants.selectRokuIntent.badSelectionSpeach);
+                            speachQueue.push(helpers.listRokusToSpeach(rokus));
+                            reprompt = constants.selectRokuIntent.instructionSpeech(rokus);
+                        }
+                        else {
+                            //Select the Roku
+                            var roku = rokus[choice - 1];
+                            alexa.attributes[constants.attributes.selectedRoku] = roku;
+                            speachQueue.push(constants.selectRokuIntent.rokuSelectedSpeach(roku));
+                            reprompt = constants.defaultRepromptSpeech;
+                        }
                     }
                     alexa.emit(':ask', speachQueue.join(' '), reprompt);
                 }
@@ -250,21 +240,28 @@ var intents = function (options) {
         else {
             //Build up the text from the individual words.
             var text = helpers.concatSlots(alexa.event.request.intent.slots, 'text');
-
             var options = {
                 rokuId: selectedRoku.id,
                 text: text
             };
 
-            rokuService.sendText(options)
-                .then(function (success) {
+            //Tell the caller the search has begun.
+            speachQueue.push(constants.typeTextIntent.typeTextSpeach(text));
+            var dsPromise = directiveServiceFactory.enqueue(alexa.event, speachQueue.join(' '));
+            speachQueue = [];
+
+            var success;
+            var servicePromise = rokuService.sendText(options).then(function (result) { success = result; });
+
+            Promise.all([dsPromise, servicePromise])
+                .then(function () {
                     if (!success) {
                         //This should never happen but...
                         alexa.emit(':ask', constants.typeTextIntent.unableToTypeSpeach(text), constants.defaultRepromptSpeech);
                     }
                     else {
                         //Affirm the typed text.
-                        alexa.emit(':ask', constants.typeTextIntent.typeTextSpeach(text), constants.defaultRepromptSpeech);
+                        alexa.emit(':ask', constants.typeTextIntent.typingCompleteSpeach, constants.defaultRepromptSpeech);
                     }
                 })
                 .catch(function (err) {
@@ -276,8 +273,8 @@ var intents = function (options) {
 
     //Launches a Roku App.
     //Examples:
-    //  Launch Netflix
-    //  Start Amazon Prime
+    //  "Launch Netflix"
+    //  "Start Amazon Prime"
     this.launchAppIntent = function (alexa) {
 
         var selectedRoku = alexa.attributes[constants.attributes.selectedRoku];
@@ -293,10 +290,19 @@ var intents = function (options) {
                 filter: filter
             }
 
-            rokuService.launchApp(options)
-                .then(function (response) {
-                    //"launching ..."
-                    alexa.emit(':ask', constants.launchAppIntent.LaunchingSpeach(response.appName), constants.defaultRepromptSpeech);
+
+            //Tell the caller the search has begun.
+            speachQueue.push(constants.launchAppIntent.launchingSpeach(filter));
+            var dsPromise = directiveServiceFactory.enqueue(alexa.event, speachQueue.join(' '));
+            speachQueue = [];
+
+            var response;
+            var servicePromise = rokuService.launchApp(options).then(function (result) { response = result; });
+
+            Promise.all([dsPromise, servicePromise])
+                .then(function () {
+                    //"launched"
+                    alexa.emit(':ask', constants.launchAppIntent.appLaunchedSpeach(response.appName), constants.defaultRepromptSpeech);
                 })
                 .catch(function (err) {
                     var speech;
@@ -304,7 +310,7 @@ var intents = function (options) {
                         //a code means there is something wrong with the request that can be fixed.
                         switch (err.code) {
                             case 'NoMatch':
-                                //"I souldn't find..."
+                                //"I couldn't find..."
                                 speech = constants.launchAppIntent.noMatchSpeach(filter);
                                 break;
 
@@ -336,8 +342,20 @@ var intents = function (options) {
     //  "tell me my rokus"
     this.listRokusIntent = function (alexa) {
 
-        getRokus()
-            .then(function (rokus) {
+
+        var promises = [];
+        if (!rokus) {
+            //"I'm looking for Rokus..."
+            speachQueue.push(constants.selectRokuIntent.lookingForRokusSpeach);
+            var dsPromise = directiveServiceFactory.enqueue(alexa.event, speachQueue.join(' '));
+            promises.push(dsPromise);
+            speachQueue = [];
+        }
+        var rokuPromise = getRokus();
+        promises.push(rokuPromise);
+
+        Promise.all(promises)
+            .then(function () {
                 if (!rokus || !rokus.length) {
                     //Tell the caller to turn on a Roku and try again.
                     alexa.emit(':tell', constants.selectRokuIntent.noRokusFoundSpeach);
@@ -371,6 +389,10 @@ var intents = function (options) {
     //Lists help speach for the caller.
     this.helpIntent = function (alexa) {
         alexa.emit(':ask', constants.helpIntent.generalHelpSpeach, constants.defaultRepromptSpeech);
+    };
+
+    this.sessionEndedIntent = function (alexa) {
+        alexa.emit(':tell', constants.sessionEndedIntent.sessionEndedSpeach);
     };
 };
 

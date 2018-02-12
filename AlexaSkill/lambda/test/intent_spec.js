@@ -19,6 +19,7 @@ describe.only('Roku intents', function () {
     var nextState; //Holds the next intent to be called after Alexa's call to emitWithState method.
     var stubOptions; //Options for the Roku service mock.
     var stubCallbackValues; //holds the values actually sent to the Roku service by the subject method under test.
+    var voiceDirectiveResponse; //Holds the text enqueued to Alexa while waiting for the service to finish.
 
     //A simple mockup of the alexa-sdk's alexaRequestHandler.
     var alexaStub = {
@@ -40,6 +41,13 @@ describe.only('Roku intents', function () {
         attributes: {}
     };
 
+    //A simple stub of a DirectiveServiceFactory instance.
+    var directiveServiceStub = {
+        enqueue: function (event, message) {
+            voiceDirectiveResponse = message;
+        }
+    };
+
     //Real simple logger stub.
     var loggerStub = {
         error: function () {
@@ -49,6 +57,7 @@ describe.only('Roku intents', function () {
     beforeEach(function () {
         alexaResponse = null;
         nextState = null;
+        voiceDirectiveResponse = null;
         stubOptions = {
             callback: (options) => stubCallbackValues = options
         };
@@ -98,7 +107,7 @@ describe.only('Roku intents', function () {
                 });
                 it('Alexa should welcome the user back and wait for a command', function () {
                     alexaResponse.command.should.equal(':ask');
-                    alexaResponse.speach.should.equal(constants.newSessionIntent.startupSpeech);
+                    alexaResponse.speach.should.equal(constants.newSessionIntent.launchSpeech);
                     alexaResponse.reprompt.should.equal(constants.newSessionIntent.repromptSpeech);
                 });
             });
@@ -118,89 +127,7 @@ describe.only('Roku intents', function () {
     });
 
     describe('selectRokuIntent', function () {
-
-        var rokus;
-        var error;
-
-        var act = function (done) {
-            stubOptions.returnVal = rokus;
-            stubOptions.error = error;
-
-            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub })
-            subject.selectRokuIntent(alexaStub);
-
-            waitForPromise(done);
-        }
-
-        describe('when there are multiple Rokus to choose from', function () {
-
-            beforeEach((done) => {
-                rokus = rokuLists.multipleRokus;
-                act(done);
-            });
-            it('Alexa should prompt the user with a selection of Rokus to choose from', function () {
-                alexaResponse.command.should.equal(':ask');
-                alexaResponse.speach.should.contain(constants.selectRokuIntent.selectARokuSpeach);
-                alexaResponse.speach.should.contain(helpers.listRokusToSpeach(rokus));
-                alexaResponse.reprompt.should.equal(constants.selectRokuIntent.instructionSpeech(rokus));
-            });
-        });
-
-        describe('when there only one roku to choose from', function () {
-
-            beforeEach((done) => {
-                rokus = rokuLists.oneRoku;
-                act(done);
-            });
-
-            it('should select the Roku', function () {
-                alexaStub.attributes[constants.attributes.selectedRoku].should.equal(rokus[0]);
-            });
-            it('Alexa should inform the user of the choice and wait for a command', function () {
-                alexaResponse.command.should.equal(':ask');
-                alexaResponse.speach.should.contain(constants.selectRokuIntent.singleRokuFoundSpeach(rokus[0]));
-                alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
-            });
-        });
-
-        describe('when there are no Rokus to choose from', function () {
-
-            beforeEach((done) => {
-                rokus = rokuLists.noRokus;
-                act(done);
-            });
-
-            it('Alexa should tell the user to turn on one or more Roku\'s and try again', function () {
-                alexaResponse.command.should.equal(':tell');
-                alexaResponse.speach.should.equal(constants.selectRokuIntent.noRokusFoundSpeach);
-            });
-        });
-
-        describe('when the backend service throws an error.', function () {
-
-            beforeEach((done) => {
-                rokus = undefined;
-                error = 'FAIL!';
-                sinon.spy(loggerStub, 'error');
-                act(done);
-            });
-            afterEach(function () {
-                loggerStub.error.restore();
-            });
-
-            it('should log the error', function () {
-                loggerStub.error.calledOnce.should.equal(true);
-            });
-
-            it('Alexa should tell the user to check on the server\'s status', function () {
-                alexaResponse.command.should.equal(':tell');
-                alexaResponse.speach.should.equal(constants.selectRokuIntent.unableToListRokus);
-            });
-        });
-    });
-
-    describe('selectedRokuIntent', function () {
-        var selectedIndex;
+        var selectedValue;
         var selectedRoku;
         var rokus;
         var error;
@@ -209,68 +136,133 @@ describe.only('Roku intents', function () {
             stubOptions.returnVal = rokus;
             stubOptions.error = error;
 
-            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub })
-            subject.selectedRokuIntent(alexaStub);
+            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub, directiveServiceFactory: directiveServiceStub })
+            subject.selectRokuIntent(alexaStub);
 
             waitForPromise(done);
         }
 
-        before(function () {
-            rokus = rokuLists.multipleRokus;
-            selectedIndex = 1
-            selectedRoku = rokus[selectedIndex - 1];
-        });
-
         beforeEach((done) => {
-            alexaStub.event = requests.selectedRoku(selectedIndex);
+            alexaStub.event = requests.selectedRoku(selectedValue);
             act(done);
         });
 
-        it('should select the intended Roku', function () {
-            alexaStub.attributes[constants.attributes.selectedRoku].should.equal(selectedRoku);
-        });
-        it('Alexa should tell the caller of the selected Roku, and wait for a command', function () {
-            alexaResponse.command.should.equal(':ask');
-            alexaResponse.speach.should.equal(constants.selectedRokuIntent.rokuSelectedSpeach(selectedRoku));
-            alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
-        });
+        describe('when no Roku was provided', function () {
 
-        describe('when the selection isn\'t a number', function () {
-            describe('when the selection is one of the roku names', function () {
-                var namedRoku;
+            it('Alexa should tell the caller to wait while Alexa looks for Rokus', function () {
+                voiceDirectiveResponse.should.equal(constants.selectRokuIntent.lookingForRokusSpeach);
+            });
+
+
+            describe('when there are multiple Rokus to choose from', function () {
+
                 before(() => {
-                    selectedIndex = 'bedroom';
-                    namedRoku = rokus[1];
+                    rokus = rokuLists.multipleRokus;
                 });
-
-                it('should select the intended Roku', function () {
-                    alexaStub.attributes[constants.attributes.selectedRoku].should.equal(namedRoku);
-                });
-                it('Alexa should tell the caller of the selected Roku, and wait for a command', function () {
+                it('Alexa should prompt the user with a selection of Rokus to choose from', function () {
                     alexaResponse.command.should.equal(':ask');
-                    alexaResponse.speach.should.equal(constants.selectedRokuIntent.rokuSelectedSpeach(namedRoku));
+                    alexaResponse.speach.should.contain(constants.selectRokuIntent.selectARokuSpeach);
+                    alexaResponse.speach.should.contain(helpers.listRokusToSpeach(rokus));
+                    alexaResponse.reprompt.should.equal(constants.selectRokuIntent.instructionSpeech(rokus));
+                });
+            });
+
+            describe('when there only one roku to choose from', function () {
+
+                before(() => {
+                    rokus = rokuLists.oneRoku;
+                });
+    
+                it('should select the Roku', function () {
+                    alexaStub.attributes[constants.attributes.selectedRoku].should.equal(rokus[0]);
+                });
+                it('Alexa should inform the user of the choice and wait for a command', function () {
+                    alexaResponse.command.should.equal(':ask');
+                    alexaResponse.speach.should.contain(constants.selectRokuIntent.singleRokuFoundSpeach(rokus[0]));
                     alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
                 });
-            })
-            describe('when the selection is unknown', function () {
-                before(() => selectedIndex = 'alpha');
-                it('Alexa should reprompt the caller with a selection of Rokus', function () {
-                    nextState.should.equal(constants.intents.SelectRokuIntent);
+            });
+    
+            describe('when there are no Rokus to choose from', function () {
+    
+                before(() => {
+                    rokus = rokuLists.noRokus;
+                });
+    
+                it('Alexa should tell the user to turn on one or more Roku\'s and try again', function () {
+                    alexaResponse.command.should.equal(':tell');
+                    alexaResponse.speach.should.equal(constants.selectRokuIntent.noRokusFoundSpeach);
                 });
             });
+                
         });
 
-        describe('when the selection is out of bounds', function () {
-            it('Alexa should reprompt the caller with a selection of Rokus', function () {
-                nextState.should.equal(constants.intents.SelectRokuIntent);
+        describe('when a Roku to select is provided', function () {
+
+            before(function () {
+                rokus = rokuLists.multipleRokus;
+                selectedValue = "1";
+                selectedRoku = rokus[selectedValue - 1];
             });
+
+            it('should select the intended Roku', function () {
+                alexaStub.attributes[constants.attributes.selectedRoku].should.equal(selectedRoku);
+            });
+
+            it('Alexa should tell the caller of the selected Roku, and wait for a command', function () {
+                alexaResponse.command.should.equal(':ask');
+                alexaResponse.speach.should.equal(constants.selectRokuIntent.rokuSelectedSpeach(selectedRoku));
+                alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
+            });
+
+            describe('when the selection isn\'t a number', function () {
+                describe('when the selection is one of the roku names', function () {
+                    var namedRoku;
+                    before(() => {
+                        selectedValue = 'family room';
+                        namedRoku = rokus[1];
+                    });
+
+                    it('should select the intended Roku', function () {
+                        alexaStub.attributes[constants.attributes.selectedRoku].should.equal(namedRoku);
+                    });
+                    it('Alexa should tell the caller of the selected Roku, and wait for a command', function () {
+                        alexaResponse.command.should.equal(':ask');
+                        alexaResponse.speach.should.equal(constants.selectRokuIntent.rokuSelectedSpeach(namedRoku));
+                        alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
+                    });
+                })
+                describe('when the selection is unknown', function () {
+                    before(() => selectedValue = 'alpha');
+                    it('Alexa should tell the caller the the choice was invalid', function() {
+                        alexaResponse.command.should.equal(':ask');
+                        alexaResponse.speach.should.contain(constants.selectRokuIntent.badSelectionSpeach);
+                        alexaResponse.reprompt.should.equal(constants.selectRokuIntent.instructionSpeech(rokus));
+                    });
+                    it('Alexa should reprompt the caller with a selection of Rokus', function () {
+                        alexaResponse.speach.should.contain(helpers.listRokusToSpeach(rokus));
+                    });
+                });
+            });
+
+            describe('when the selection is out of bounds', function () {
+                it('Alexa should tell the caller the the choice was invalid', function() {
+                    before(() => selectedValue = '-1');
+                    alexaResponse.command.should.equal(':ask');
+                    alexaResponse.speach.should.contain(constants.selectRokuIntent.badSelectionSpeach);
+                    alexaResponse.reprompt.should.equal(constants.selectRokuIntent.instructionSpeech(rokus));
+                });
+                it('Alexa should reprompt the caller with a selection of Rokus', function () {
+                    alexaResponse.speach.should.contain(helpers.listRokusToSpeach(rokus));
+                });
         });
 
-        describe('when there are no rokus available', function () {
-            before(() => rokus = rokuLists.noRokus);
-            it('Alexa should prompt the caller to turn on a Roku', function () {
-                alexaResponse.command.should.equal(':tell');
-                alexaResponse.speach.should.equal(constants.selectRokuIntent.noRokusFoundSpeach);
+            describe('when there are no rokus available', function () {
+                before(() => rokus = rokuLists.noRokus);
+                it('Alexa should prompt the caller to turn on a Roku', function () {
+                    alexaResponse.command.should.equal(':tell');
+                    alexaResponse.speach.should.equal(constants.selectRokuIntent.noRokusFoundSpeach);
+                });
             });
         });
 
@@ -473,7 +465,7 @@ describe.only('Roku intents', function () {
             stubOptions.error = error;
 
             alexaStub.attributes[constants.attributes.selectedRoku] = selectedRoku;
-            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub })
+            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub, directiveServiceFactory: directiveServiceStub })
             subject.typeTextIntent(alexaStub);
             waitForPromise(done);
 
@@ -499,13 +491,19 @@ describe.only('Roku intents', function () {
             it('should pass in the roku ID saved in Alexa\'s session', function () {
                 stubCallbackValues.rokuId.should.equal(selectedRoku.id);
             });
-            it('should send the text', function () {
+
+            it('Alexa should tell the user the text is being typed', function () {
+                voiceDirectiveResponse.should.equal(constants.typeTextIntent.typeTextSpeach('hello world'));
+            });
+
+            it('should send the text to the service', function () {
                 stubCallbackValues.text.should.equal('hello world', 'topic [callback:text]');
             });
 
+
             it('Alexa should tell the user the text has been sent and wait for a command', function () {
                 alexaResponse.command.should.equal(':ask');
-                alexaResponse.speach.should.equal(constants.typeTextIntent.typeTextSpeach('hello world'));
+                alexaResponse.speach.should.equal(constants.typeTextIntent.typingCompleteSpeach);
                 alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
             });
 
@@ -573,7 +571,7 @@ describe.only('Roku intents', function () {
 
             alexaStub.attributes[constants.attributes.selectedRoku] = selectedRoku;
             alexaStub.event = requests.launchApp(appName);
-            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub })
+            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub, directiveServiceFactory: directiveServiceStub })
             subject.launchAppIntent(alexaStub);
             waitForPromise(done);
 
@@ -600,13 +598,17 @@ describe.only('Roku intents', function () {
                 stubCallbackValues.rokuId.should.equal(selectedRoku.id);
             });
 
-            it('should send the app filter', function () {
+            it('Alexa should tell the user the app is being launched', function () {
+                voiceDirectiveResponse.should.equal(constants.launchAppIntent.launchingSpeach(appName));
+            });
+
+            it('should send the app filter to the service', function () {
                 stubCallbackValues.filter.should.equal(appName, 'topic [callback:filter]');
             });
 
             it('Alexa should tell the caller the app was launched, then wait for a command', function () {
                 alexaResponse.command.should.equal(':ask');
-                alexaResponse.speach.should.equal(constants.launchAppIntent.LaunchingSpeach(appName));
+                alexaResponse.speach.should.equal(constants.launchAppIntent.appLaunchedSpeach(appName));
                 alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
             });
         });
@@ -705,7 +707,7 @@ describe.only('Roku intents', function () {
                 stubOptions.returnVal = rokus;
                 stubOptions.error = error;
 
-                subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub })
+                subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub, directiveServiceFactory: directiveServiceStub })
                 subject.listRokusIntent(alexaStub);
                 waitForPromise(done);
 
@@ -719,6 +721,11 @@ describe.only('Roku intents', function () {
             beforeEach(function (done) {
                 rokus = rokuLists.multipleRokus;
                 act(done);
+            });
+
+            it('Alexa should tell the caller to wait while Alexa looks for Rokus', function (done) {
+                act(done);
+                voiceDirectiveResponse.should.equal(constants.selectRokuIntent.lookingForRokusSpeach);
             });
 
             it("Alexa should list the rokus that she found, then wait for a command.", function () {
@@ -797,6 +804,15 @@ describe.only('Roku intents', function () {
             alexaResponse.command.should.equal(':ask');
             alexaResponse.speach.should.equal(constants.helpIntent.generalHelpSpeach);
             alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
+        });
+    });
+
+    describe('sessionEndedIntent', function () {
+        it("Alexa should indicate the session has ended", function () {
+            subject = new intents({});
+            subject.sessionEndedIntent(alexaStub);
+            alexaResponse.command.should.equal(':tell');
+            alexaResponse.speach.should.equal(constants.sessionEndedIntent.sessionEndedSpeach);
         });
     });
 });

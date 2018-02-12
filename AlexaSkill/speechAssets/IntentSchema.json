@@ -1,13 +1,18 @@
 {
   "intents": [
     {
-      "intent": "SelectRokuIntent"
-    },
-    {
-      "intent": "SelectedRokuIntent",
+      "intent": "SelectRokuIntent",
       "slots": [
         {
-          "name": "choice",
+          "name": "choice_a",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "choice_b",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "choice_c",
           "type": "ANY_CONTENT"
         }
       ]

@@ -1,17 +1,44 @@
 
-SelectedRokuIntent select roku number {choice}
-SelectedRokuIntent choose roku number {choice}
-SelectedRokuIntent change to roku number {choice}
-SelectedRokuIntent switch to roku number {choice}
-SelectedRokuIntent choose roku {choice}
-SelectedRokuIntent change to roku {choice}
-SelectedRokuIntent switch to roku {choice}
-SelectedRokuIntent use roku {choice}
-SelectedRokuIntent use {choice} roku
-SelectedRokuIntent use my {choice} roku
+SelectRokuIntent select roku number {choice_a}
+SelectRokuIntent choose roku number {choice_a}
+SelectRokuIntent change to roku number {choice_a}
+SelectRokuIntent switch to roku number {choice_a}
+
+SelectRokuIntent choose roku {choice_a}
+SelectRokuIntent choose roku {choice_a} {choice_b}
+SelectRokuIntent choose roku {choice_a} {choice_b} {choice_c}
+
+SelectRokuIntent change to roku {choice_a}
+SelectRokuIntent change to roku {choice_a} {choice_b}
+SelectRokuIntent change to roku {choice_a} {choice_b} {choice_c}
+
+SelectRokuIntent switch to {choice_a}
+SelectRokuIntent switch to {choice_a} {choice_b}
+SelectRokuIntent switch to {choice_a} {choice_b} {choice_c}
+
+SelectRokuIntent switch to roku {choice_a}
+SelectRokuIntent switch to roku {choice_a} {choice_b}
+SelectRokuIntent switch to roku {choice_a} {choice_b} {choice_c}
+
+SelectRokuIntent switch to my {choice_a} roku
+SelectRokuIntent switch to my {choice_a} {choice_b} roku
+SelectRokuIntent switch to my {choice_a} {choice_b} {choice_c} roku
+
+SelectRokuIntent use roku {choice_a}
+SelectRokuIntent use roku {choice_a} {choice_b}
+SelectRokuIntent use roku {choice_a} {choice_b} {choice_c}
+
+SelectRokuIntent use {choice_a} roku
+SelectRokuIntent use {choice_a} {choice_b} roku
+SelectRokuIntent use {choice_a} {choice_b} {choice_c} roku
+
+SelectRokuIntent use my {choice_a} roku
+SelectRokuIntent use my {choice_a} {choice_b} roku
+SelectRokuIntent use my {choice_a} {choice_b} {choice_c} roku
 
 SelectRokuIntent select roku
 SelectRokuIntent select a roku
+SelectRokuIntent switch rokus
 
 ListRokusIntent list my rokus
 ListRokusIntent list all my rokus

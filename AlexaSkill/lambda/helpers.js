@@ -60,7 +60,7 @@ var concatSlots = function (slots, slotName) {
             }
         }
     }
-    var value = values.join( ' ').trim();
+    var value = values.join(' ').trim();
     return value;
 }
 
@@ -91,6 +91,7 @@ var constants = {
     //Intent specific constants.
     newSessionIntent: {
         startupSpeech: 'Welcome to My Roku Remote.',
+        launchSpeech: 'My Roku Remote is ready for a command.',
         introductorySpeech: 'I can control your Roku with series of voice commands.',
         selectRokuSpeech: 'Before we begin, you must first select a roku.',
         repromptSpeech: 'Tell me what you want the remote to do. Ask for help to learn more.',
@@ -98,13 +99,16 @@ var constants = {
     },
 
     selectRokuIntent: {
+        lookingForRokusSpeach: 'I\'m looking for Rokus on your network.',
         selectARokuSpeach: 'Please choose one of the folowing Rokus.',
         singleRokuFoundSpeach: function (roku) {
             return sayRokuName(roku) + ' was the only Roku I found on your network. So I will choose this Roku to control.';
         },
+        lookingForRokuSpeach: 'Ok. I\'m looking for Roku',
         noRokusFoundSpeach: 'I couldn\'t find any Rokus on your local network. Make sure your Roku is turned on an has finished initializing. Then try again.',
-        unableToListRokus: 'I\'m Sorry, I was unable to connect to your Roku Remote Server. Make sure you have your server running and any firewall forwarding in place.',
+        unableToListRokus: 'I\'m Sorry, I was unable to connect to your Roku Remote Server. Make sure you have your server running and any firewall forwarding rules are in place.',
         repromptSpeech: 'Please Select a Roku.',
+        badSelectionSpeach: 'I\'m sorry, that isn\'t a valid choice. Please choose one of the folowing Rokus.',
         instructionSpeech: function (rokus) {
             var speach = [];
             speach.push('Choose a number between 1 and ' + rokus.length + '. For example, say select roku number 2.');
@@ -121,16 +125,10 @@ var constants = {
             }
 
             return speach.join(' ');
-        }
-    },
-
-    selectedRokuIntent: {
+        },
         rokuSelectedSpeach: function (roku) {
             return 'Ok. I\'ve selected ' + sayRokuName(roku) + ' for you.'
-        },
-
-        badSelectionSpeach: 'I\'m sorry, that isn\'t a valid choice. Please choose one of the folowing Rokus.',
-
+        }
     },
 
     launchIntent: {
@@ -138,13 +136,13 @@ var constants = {
     },
 
     listRokusIntent: {
-        multipleRokusFoundSpeach: 'Here is a list of Rokus I found on you network.',
+        multipleRokusFoundSpeach: 'Here is a list of Rokus I found on your network.',
         singleRokuFoundSpeach: 'I found one Roku on your network.'
     },
 
     sendCommandIntent: {
         commandSentSpeach: '<audio src="https://s3-us-west-2.amazonaws.com/yozepi-alexa-files/roku/tick_alexa.mp3" />',
-        noCommandSentSpeach: 'No command sent.',
+        noCommandSentSpeach: 'I\'m sorry, I couldn\'t understand what you said.',
         unableToSendCommandSpeach: 'Unable to send command. Please try again.',
         badCountSpeach: 'you can only execute a command between 1 and 10 times.',
         invalidCommandSpeach: function (commandSpeach) {
@@ -158,7 +156,9 @@ var constants = {
         },
         typeTextSpeach: function (text) {
             return 'Typing ' + text;
-        }
+        },
+
+        typingCompleteSpeach: 'Done typing.'
     },
 
     launchAppIntent: {
@@ -177,8 +177,11 @@ var constants = {
         unableToLaunchSpeach: function (appText) {
             return 'Sorry, I could not launch ' + appText;
         },
-        LaunchingSpeach: function (appText) {
-            return 'Launching ' + appText;
+        launchingSpeach: function (appText) {
+            return 'Ok. Launching ' + appText;
+        },
+        appLaunchedSpeach: function (appText) {
+            return appText + " launched.";
         }
     },
 
@@ -217,6 +220,9 @@ var constants = {
             + ' For example, saying backspace 5, will backspace 5 characters.</p>'
     },
 
+    sessionEndedIntent: {
+        sessionEndedSpeach: '<audio src="https://s3-us-west-2.amazonaws.com/yozepi-alexa-files/roku/EndSession.mp3" />'
+    }
 }
 
 
