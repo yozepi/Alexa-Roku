@@ -8,7 +8,7 @@ var helpers = require('../helpers');
 var requests = require('./data/alexaRequests');
 var rokuLists = require('./data/rokuLists');
 var rokuServiceStub = require('./mocks/RokuServiceStub');
-var commands = require('../Roku/RokuCommands');
+var commands = require('shared-services').roku.commands;
 var intents = require('../Roku/rokuIntents');
 
 describe.only('Roku intents', function () {

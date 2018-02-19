@@ -2,10 +2,9 @@
 
 
 var expect = require('chai').expect;
-var constants = require('../helpers').constants;
 var commands = require('../Roku/RokuCommands');
 
-var subject = require('../services/rokuHttpService');
+var subject = require('../Roku/rokuHttpService');
 
 //I use this to test connection and functionality of the "real" 
 //Roku Service. It's not meant to be part of the actual unit tests.

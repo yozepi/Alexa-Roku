@@ -3,7 +3,7 @@
 var Promise = require('promise');
 var constants = require('../helpers').constants;
 var helpers = require('../helpers');
-var RokuCommands = require('../Roku/RokuCommands');
+var RokuCommands = require('shared-services').roku.commands;
 
 /* These are the intents Alexa will call when implementing the Roku remote skill */
 

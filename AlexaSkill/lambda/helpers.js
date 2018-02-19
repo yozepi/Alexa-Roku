@@ -1,6 +1,6 @@
 'use strict';
 
-var commands = require('./Roku/RokuCommands');
+var commands = require('shared-services').roku.commands;
 
 //Turns an array of texts into a speach listing them by number.
 //This is usefull for listing app names or Rokus.
