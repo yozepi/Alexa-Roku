@@ -20,7 +20,9 @@ var commands = {
     "information": "Info",
     "backspace": "Backspace",
     "enter": "Enter",
-    "search": "Search"
+    "search": "Search",
+    "option": "*",
+    "options": "*"
 }
 
 module.exports = commands;

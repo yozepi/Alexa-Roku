@@ -43,7 +43,7 @@ var snsHandler = function (options) {
         } catch (err) {
             logger.error(err);
             logger.error(msg);
-            throw(err);
+            throw err;
         }
     }
 };
