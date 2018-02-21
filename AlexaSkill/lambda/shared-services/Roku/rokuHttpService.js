@@ -12,8 +12,8 @@ var listRokus = function () {
 
     var uri = getBaseUrl();
 
-    return makeRequest(uri, function (result, resolve) {
-        resolve(result);
+    return makeRequest(uri, function (result) {
+        return result;
     });
 
 };
@@ -29,8 +29,8 @@ var sendCommand = function (options) {
         uri += '/' + count;
     }
 
-    return makeRequest(uri, function (result, resolve) {
-        resolve(true);
+    return makeRequest(uri, function (result) {
+        return true;
     });
 };
 
@@ -41,8 +41,8 @@ var sendText = function (options) {
 
     var uri = getBaseUrl() + '/' + rokuId + '/type?text=' + text;
 
-    return makeRequest(uri, function (result, resolve) {
-        resolve(true);
+    return makeRequest(uri, function (result) {
+        return true;
     });
 };
 
@@ -54,8 +54,8 @@ var launchApp = function (options) {
 
     var uri = getBaseUrl() + '/' + rokuId + '/apps/launch?filter=' + filter;
 
-    return makeRequest(uri, function (result, resolve) {
-        resolve(result);
+    return makeRequest(uri, function (result) {
+        return result;
     });
 };
 
@@ -70,15 +70,21 @@ var makeRequest = function (url, whenDone) {
             headers: {
                 'User-Agent': 'Roku Alexa Lambda'
             }
-        }).then((result) => whenDone(result, resolve))
-            .catch(function (err) {
-                if (err.error) {
-                    reject(err.error);
-                }
-                else {
-                    reject(err);
-                }
-            });
+        }).then((result) => {
+            try {
+                var retVal = whenDone(result);
+                resolve(retVal);
+            } catch (err) {
+                throw err;
+            }
+        }).catch(function (err) {
+            if (err.error) {
+                reject(err.error);
+            }
+            else {
+                reject(err);
+            }
+        });
     });
 };
 

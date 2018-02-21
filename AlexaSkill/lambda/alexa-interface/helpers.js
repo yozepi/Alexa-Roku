@@ -68,7 +68,7 @@ var constants = {
     //Shared / global constants.
     //The Alexa skill Id.
     appId: 'amzn1.ask.skill.19019d99-bdb9-4226-9a7b-ba0e380b60d3',
-    defaultRepromptSpeech: 'Ready for a command.',
+    defaultRepromptSpeech: 'Ready for a ROKU command.',
 
     //Intent names.
     intents: {

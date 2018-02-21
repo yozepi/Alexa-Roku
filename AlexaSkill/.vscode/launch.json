@@ -5,19 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach",
-            "port": 9229
-        },
-        {
-            "name": "mocha tests",
+            "name": "Alexa Lambda tests",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/lambda/node_modules/mocha/bin/_mocha",
+            "program": "${workspaceFolder}/lambda/alexa-interface/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
             "args": [
-                "${workspaceRoot}/lambda/test/**/*.js",
+                "${workspaceRoot}/lambda/alexa-interface/test/**/*.js",
                 "--no-timeouts",
                 "--colors"
             ], //you can specify paths to specific tests here
@@ -28,10 +22,33 @@
             }
         },
         {
+            "name": "shared-services tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/lambda/shared-services/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": [
+                "${workspaceRoot}/lambda/shared-services/test/**/*.js",
+                "--no-timeouts",
+                "--colors"
+            ], //you can specify paths to specific tests here
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": {
+                "NODE_ENV": "testing"
+            }
+        },
+       {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "program": "${file}"
-        }
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach",
+            "port": 9229
+        },
     ]
 }

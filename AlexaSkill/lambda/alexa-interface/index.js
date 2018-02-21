@@ -1,7 +1,11 @@
 "use strict"
 
 var constants = require('./helpers').constants;
-var rokuService = require('./services/rokuHttpService');
+var rokuService = require('shared-services').roku.rokuHttpService;
+//Replace the Http version of the Send command with the SNS version.
+//This will queue commands and enable Alexa to continue without blocking.
+rokuService.sendCommand =  require('shared-services').roku.rokuSnsService.sendCommand;
+
 var rokuIntents = require('./Roku/rokuIntents');
 var directiveServiceFactory = require('./Roku/DirectiveServiceFactory');
 var Alexa = require('alexa-sdk');

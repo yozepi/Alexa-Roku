@@ -21,6 +21,6 @@
   "devDependencies": {
     "chai": "*",
     "mocha": "*",
-    "sinon": "^4.2.1"
+    "sinon": "^4.3.0"
   }
 }
