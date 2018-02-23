@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./testHarness.js",
-    "test": "mocha",
+    "test": "istanbul cover ./node_modules/mocha/bin/_mocha -- ./test/**spec.js",
     "watch_tests": "mocha --watch"
   },
   "author": "",
@@ -20,7 +19,9 @@
   },
   "devDependencies": {
     "chai": "*",
-    "mocha": "*",
+    "istanbul": "^0.4.5",
+    "mocha": "^5.0.1",
+    "mocha-webpack": "^1.0.1",
     "sinon": "^4.3.0"
   }
 }
