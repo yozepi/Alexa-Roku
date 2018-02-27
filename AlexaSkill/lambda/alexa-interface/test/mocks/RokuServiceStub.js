@@ -31,6 +31,10 @@ var stub = function (options) {
         return MakePromise(options);
     };
 
+    this.search = function (options) {
+        return MakePromise(options);
+    };
+
     this.launchApp = function (options) {
         return MakePromise(options);
     };

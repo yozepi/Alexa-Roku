@@ -76,6 +76,7 @@ var constants = {
         'SelectedRokuIntent': 'SelectedRokuIntent',
         'SendCommandIntent': 'SendCommandIntent',
         'TypeTextIntent': 'TypeTextIntent',
+        'SearchIntent': 'SearchIntent',
         'LaunchAppIntent': 'LaunchAppIntent',
         'ListRokusIntent': 'ListRokusIntent',
         'AMAZON.HelpIntent': 'AMAZON.HelpIntent',
@@ -159,6 +160,17 @@ var constants = {
         },
 
         typingCompleteSpeach: 'Done typing.'
+    },
+
+    searchIntent: {
+        unableToSearchSpeach: function (text) {
+            return 'Sorry, I was unable to search for ' + text;
+        },
+        searchSpeach: function (text) {
+            return 'Searching for ' + text;
+        },
+
+        searchCompleteSpeach: 'Search complete.'
     },
 
     launchAppIntent: {

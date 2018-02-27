@@ -271,6 +271,49 @@ var intents = function (options) {
         }
     };
 
+    //Invokes the Roku's search feature to search for the provided text
+    this.searchIntent = function(alexa) {
+
+        var selectedRoku = alexa.attributes[constants.attributes.selectedRoku];
+        if (!selectedRoku) {
+            alexa.emitWithState(constants.intents.SelectRokuIntent);
+        }
+        else {
+            //Build up the text from the individual words.
+            var text = helpers.concatSlots(alexa.event.request.intent.slots, 'text');
+            var options = {
+                rokuId: selectedRoku.id,
+                text: text
+            };
+
+            
+            //Tell the caller the search has begun.
+            speachQueue.push(constants.searchIntent.searchSpeach(text));
+            var dsPromise = directiveServiceFactory.enqueue(alexa.event, speachQueue.join(' '));
+            speachQueue = [];
+
+            var success;
+            var servicePromise = rokuService.search(options).then(function (result) { success = result; });
+
+            Promise.all([dsPromise, servicePromise])
+                .then(function () {
+                    if (!success) {
+                        //This should never happen but...
+                        alexa.emit(':ask', constants.searchIntent.unableToSearchSpeach(text), constants.defaultRepromptSpeech);
+                    }
+                    else {
+                        //Affirm the typed text.
+                        alexa.emit(':ask', constants.searchIntent.searchCompleteSpeach, constants.defaultRepromptSpeech);
+                    }
+                })
+                .catch(function (err) {
+                    logger.error(err);
+                    alexa.emit(':ask', constants.searchIntent.unableToSearchSpeach(text), constants.defaultRepromptSpeech);
+                });
+
+        }
+    }
+
     //Launches a Roku App.
     //Examples:
     //  "Launch Netflix"

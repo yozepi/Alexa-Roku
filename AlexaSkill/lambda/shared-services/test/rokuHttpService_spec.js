@@ -96,6 +96,36 @@ describe("rokuHttpService", function () {
         });
     });
 
+    describe("search", function () {
+
+        var options;
+
+        beforeEach(function () {
+            this.timeout(5000);
+            options = { rokuId: '2LD55R049841' };
+        });
+
+        afterEach(function () {
+            this.timeout(2000);
+        });
+
+        describe("searching", function () {
+            it("should execute without any errors", function () {
+                options.text = "desolation of smaug";
+                return subject.search(options)
+                    .then((result) => expect(result).to.equal(true));
+            });
+        });
+
+        describe("searching without text", function () {
+            it("should receive an error", function () {
+                options.text = undefined;
+                return subject.search(options)
+                    .catch((err) => expect(err, 'topic [err]').to.exist);
+            });
+        });
+    });
+
     describe("launchApp", function () {
 
         var options;

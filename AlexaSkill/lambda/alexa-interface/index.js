@@ -29,6 +29,7 @@ exports.handler = function (event, context, callback) {
     'SelectRokuIntent': function () { intents.selectRokuIntent(this); },
     'SendCommandIntent': function () { intents.sendCommandIntent(this); },
     'TypeTextIntent': function () { intents.typeTextIntent(this); },
+    'SearchIntent': function () { intents.searchIntent(this); },
     'LaunchAppIntent': function () { intents.launchAppIntent(this); },
     'ListRokusIntent': function () { intents.listRokusIntent(this); },
     'AMAZON.HelpIntent': function () { intents.helpIntent(this); },

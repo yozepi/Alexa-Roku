@@ -74,16 +74,16 @@ TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_
 TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i}
 TypeTextIntent type {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i} {text_j}
 
-TypeTextIntent search for {text_a}
-TypeTextIntent search for {text_a} {text_b}
-TypeTextIntent search for {text_a} {text_b} {text_c}
-TypeTextIntent search for {text_a} {text_b} {text_c} {text_d}
-TypeTextIntent search for {text_a} {text_b} {text_c} {text_d} {text_e}
-TypeTextIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f}
-TypeTextIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g}
-TypeTextIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h}
-TypeTextIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i}
-TypeTextIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i} {text_j}
+SearchIntent search for {text_a}
+SearchIntent search for {text_a} {text_b}
+SearchIntent search for {text_a} {text_b} {text_c}
+SearchIntent search for {text_a} {text_b} {text_c} {text_d}
+SearchIntent search for {text_a} {text_b} {text_c} {text_d} {text_e}
+SearchIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f}
+SearchIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g}
+SearchIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h}
+SearchIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i}
+SearchIntent search for {text_a} {text_b} {text_c} {text_d} {text_e} {text_f} {text_g} {text_h} {text_i} {text_j}
 
 
 LaunchAppIntent launch {filter_a}

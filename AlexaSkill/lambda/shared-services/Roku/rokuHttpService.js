@@ -46,6 +46,18 @@ var sendText = function (options) {
     });
 };
 
+//Invoke a Roku search.
+var search = function (options) {
+    var text = options.text ? encodeURIComponent(options.text) : '';
+    var rokuId = options.rokuId;
+
+    var uri = getBaseUrl() + '/' + rokuId + '/search?text=' + text;
+
+    return makeRequest(uri, function (result) {
+        return true;
+    });
+};
+
 //Launch an app.
 var launchApp = function (options) {
     var callback = options.callback;
@@ -100,5 +112,6 @@ module.exports = {
     listRokus: listRokus,
     sendCommand: sendCommand,
     sendText: sendText,
+    search: search,
     launchApp: launchApp
 };

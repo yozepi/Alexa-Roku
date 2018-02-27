@@ -20,7 +20,6 @@ var commands = {
     "information": "Info",
     "backspace": "Backspace",
     "enter": "Enter",
-    "search": "Search",
     "option": "*",
     "options": "*"
 }

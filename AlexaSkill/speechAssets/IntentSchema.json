@@ -76,6 +76,51 @@
       ]
     },
     {
+      "intent": "SearchIntent",
+      "slots": [
+        {
+          "name": "text_a",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_b",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_c",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_d",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_e",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_f",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_g",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_h",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_i",
+          "type": "ANY_CONTENT"
+        },
+        {
+          "name": "text_j",
+          "type": "ANY_CONTENT"
+        }
+      ]
+    },
+    {
       "intent": "LaunchAppIntent",
       "slots": [
         {

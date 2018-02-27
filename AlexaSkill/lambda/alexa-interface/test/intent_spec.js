@@ -11,7 +11,7 @@ var rokuServiceStub = require('./mocks/RokuServiceStub');
 var commands = require('shared-services').roku.commands;
 var intents = require('../Roku/rokuIntents');
 
-describe.only('Roku intents', function () {
+describe('Roku intents', function () {
 
     var subject;
 
@@ -557,6 +557,110 @@ describe.only('Roku intents', function () {
         });
     });
 
+    describe('searchIntent', function () {
+
+        var error;
+        var success;
+        var selectedRoku = { id: 'ABC12345' };
+
+        var act = function (done) {
+
+            stubOptions.returnVal = success;
+            stubOptions.error = error;
+
+            alexaStub.attributes[constants.attributes.selectedRoku] = selectedRoku;
+            subject = new intents({ rokuService: new rokuServiceStub(stubOptions), logger: loggerStub, directiveServiceFactory: directiveServiceStub })
+            subject.searchIntent(alexaStub);
+            waitForPromise(done);
+
+        };
+
+        afterEach(function () {
+            error = undefined;
+            success = undefined;
+        });
+
+
+        describe('when searching...', function () {
+
+            before(function () {
+                alexaStub.event = requests.search('hello world');
+            });
+
+            beforeEach(function (done) {
+                success = true;
+                act(done);
+            });
+
+            it('should pass in the roku ID saved in Alexa\'s session', function () {
+                stubCallbackValues.rokuId.should.equal(selectedRoku.id);
+            });
+
+            it('Alexa should tell the user the search has begun', function () {
+                voiceDirectiveResponse.should.equal(constants.searchIntent.searchSpeach('hello world'));
+            });
+
+            it('should send the text to the service', function () {
+                stubCallbackValues.text.should.equal('hello world', 'topic [callback:text]');
+            });
+
+
+            it('Alexa should tell the user the search is complete and wait for a command', function () {
+                alexaResponse.command.should.equal(':ask');
+                alexaResponse.speach.should.equal(constants.searchIntent.searchCompleteSpeach);
+                alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
+            });
+
+
+            describe('when the roku service indicates a failure', function () {
+                beforeEach(function (done) {
+                    success = false;
+                    act(done);
+                });
+
+                it('Alexa should warn the caller the search was not completed, then wait for a command', function () {
+                    alexaResponse.command.should.equal(':ask');
+                    alexaResponse.speach.should.equal(constants.searchIntent.unableToSearchSpeach('hello world'));
+                    alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
+                });
+            });
+
+
+            describe('when the backend service throws an error.', function () {
+
+                beforeEach(function (done) {
+                    sinon.spy(loggerStub, 'error');
+                    error = "Send text fail!";
+                    act(done);
+                });
+                afterEach(function () {
+                    loggerStub.error.restore();
+                });
+
+                it('should log the error', function () {
+                    loggerStub.error.calledOnce.should.equal(true);
+                });
+
+                it('Alexa should warn the caller the search was not completed, then wait for a command', function () {
+                    alexaResponse.command.should.equal(':ask');
+                    alexaResponse.speach.should.equal(constants.searchIntent.unableToSearchSpeach('hello world'));
+                    alexaResponse.reprompt.should.equal(constants.defaultRepromptSpeech);
+                });
+            });
+
+            describe('when no roku remote has been selected yet', function () {
+
+                beforeEach(function (done) {
+                    selectedRoku = undefined;
+                    act(done);
+                });
+                it('Alexa should prompt the caller to select a Roku', function () {
+                    nextState.should.equal(constants.intents.SelectRokuIntent);
+                });
+            });
+        });
+    });
+    
     describe('launchAppIntent', function () {
         var appName = 'Amazon Video';
 
